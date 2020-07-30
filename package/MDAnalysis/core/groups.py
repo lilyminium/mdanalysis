@@ -3198,7 +3198,7 @@ class AtomGroup(GroupBase):
                 "cmap only makes sense for a group with exactly 5 atoms")
         return topologyobjects.CMap(self.ix, self.universe)
 
-    def convert_to(self, package):
+    def convert_to(self, package, **kwargs):
         """
         Convert :class:`AtomGroup` to a structure from another Python package.
 
@@ -3221,6 +3221,8 @@ class AtomGroup(GroupBase):
         ----------
         package: str
             The name of the package to convert to, e.g. ``"PARMED"``
+        **kwargs:
+            Other parameters passed to the converter
 
 
         Returns
@@ -3236,7 +3238,7 @@ class AtomGroup(GroupBase):
 
         .. versionadded:: 1.0.0
         """
-        converter = get_converter_for(package)
+        converter = get_converter_for(package.upper())
         return converter().convert(self.atoms)
 
     def write(self, filename=None, file_format=None,
