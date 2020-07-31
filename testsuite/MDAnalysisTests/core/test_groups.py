@@ -1239,7 +1239,7 @@ class TestAtomGroup(object):
     def test_PDB_atom_repr(self):
         u = make_Universe(extras=('altLocs', 'names', 'types', 'resnames', 'resids', 'segids'))
         assert_equal("<Atom 1: AAA of type TypeA of resname RsA, resid 1 and segid SegA and altLoc A>", u.atoms[0].__repr__())
-    
+
     @requires_rdkit
     def test_convert_to_case_insensitive(self):
         u = mda.Universe.from_smiles("CCO")
@@ -1247,10 +1247,11 @@ class TestAtomGroup(object):
 
     @requires_rdkit
     def test_convert_to_kwargs(self):
-        u = mda.Universe.from_smiles("[C][C][O]", addHs=False, 
-            generate_coordinates=False, sanitize=False)
+        u = mda.Universe.from_smiles("[C][C][O]", addHs=False,
+                                     generate_coordinates=False,
+                                     sanitize=False)
         mol = u.atoms.convert_to("RDKIT", NoImplicit=False)
-        assert mol.GetAtomWithIdx(0).GetNoImplicit() == False
+        assert mol.GetAtomWithIdx(0).GetNoImplicit() is False
 
     @requires_rdkit
     def test_convert_to_lib_as_method(self):
@@ -1261,7 +1262,7 @@ class TestAtomGroup(object):
     def test_convert_to_lib_method_kwargs(self):
         u = mda.Universe.from_smiles("CCO")
         mol = u.atoms.convert_to.rdkit(NoImplicit=False)
-        assert mol.GetAtomWithIdx(0).GetNoImplicit() == False
+        assert mol.GetAtomWithIdx(0).GetNoImplicit() is False
 
 
 @pytest.fixture()
