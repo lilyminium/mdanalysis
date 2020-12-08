@@ -18,9 +18,9 @@ env:
   MDA_CONDA_EXTRA_DEPS: "seaborn>=0.7.0 clustalw=2.1 netcdf4 scikit-learn joblib>=0.12 tqdm>=4.43.0 chemfiles"
   MDA_CONDA_PY27_DEPS: "six funcsigs"
   MDA_CONDA_PY35_DEPS: "mock<=3.0.5"
-  MDA_PIP_MIN_DEPS: 'pytest-cov pytest-xdist'
+  MDA_PIP_MIN_DEPS: 'coveralls coverage<5 pytest-cov pytest-xdist'
   MDA_PIP_EXTRA_DEPS: 'duecredit parmed'
-  MDA_PIP_PY27_DEPS: "setuptools<45.0.0 chemfiles"
+  MDA_PIP_PY27_DEPS: ""
   MDA_PIP_PY35_DEPS: ""
 
 jobs:
