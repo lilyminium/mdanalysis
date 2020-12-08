@@ -15,10 +15,10 @@ defaults:
 
 env:
   MDA_CONDA_MIN_DEPS: "pip pytest mmtf-python biopython networkx cython matplotlib scipy griddataformats hypothesis gsd codecov"
-  MDA_CONDA_EXTRA_DEPS: "seaborn netcdf4 scikit-learn joblib>=0.12 clustalw=2.1 "
-  MDA_CONDA_PY3_DEPS: "chemfiles mock"
+  MDA_CONDA_EXTRA_DEPS: "seaborn"
+  MDA_CONDA_PY3_DEPS: "netcdf4 scikit-learn joblib>=0.12 clustalw=2.1 chemfiles mock"
   MDA_CONDA_PY27_DEPS: "six funcsigs mock<=3.0.5"
-  MDA_CONDA_PY35_DEPS: "mock<=3.0.5"
+  MDA_CONDA_PY35_DEPS: "netcdf4 scikit-learn joblib>=0.12 clustalw=2.1 mock<=3.0.5"
   MDA_PIP_MIN_DEPS: 'coveralls coverage<5 pytest-cov pytest-xdist'
   MDA_PIP_EXTRA_DEPS: 'duecredit parmed'
   MDA_PIP_PY27_DEPS: "setuptools<45.0.0 chemfiles"
@@ -36,6 +36,7 @@ jobs:
           extra_deps: ["EXTRA PY3", ]
           install_hole: [true, ]
           codecov: [true, ]
+          conda-version: ["latest", ]
           include:
             - name: python-2.7
               os: ubuntu-latest
@@ -44,6 +45,7 @@ jobs:
               codecov: true
               numpy: numpy=1.16
               extra_deps: "EXTRA PY27"
+              conda-version: 4.7.10
             - name: python-3.5
               os: ubuntu-latest
               python-version: 3.5
@@ -118,7 +120,7 @@ jobs:
         channel-priority: flexible
         channels: biobuilds, conda-forge
         add-pip-as-python-dependency: true
-        conda-version: 4.7.10
+        miniconda-version: ${{ matrix.conda-version }}
         # TODO: mamba causes pip to segfault, switch when fixed
         #mamba-version: "*"
         architecture: x64
