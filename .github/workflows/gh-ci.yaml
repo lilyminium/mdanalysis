@@ -41,7 +41,7 @@ jobs:
               install_hole: true
               codecov: true
               numpy: numpy=1.16
-              run_type: [FULL_PY2, ]
+              run_type: FULLPY2
             - name: macOS
               os: macOS-latest
               python-version: 3.7
@@ -118,8 +118,8 @@ jobs:
       env:
         MDA_CONDA_FULL_DEPS: "${{ env.MDA_CONDA_MIN_DEPS }} ${{ env.MDA_CONDA_EXTRA_DEPS }} chemfiles"
         MDA_PIP_FULL_DEPS: "${{ env.MDA_PIP_MIN_DEPS }} ${{ env.MDA_PIP_EXTRA_DEPS }}"
-        MDA_CONDA_FULL_PY2_DEPS: "${{ env.MDA_CONDA_MIN_DEPS }} ${{ env.MDA_CONDA_EXTRA_DEPS }} ${{ env.MDA_CONDA_PY2_DEPS }}"
-        MDA_PIP_FULL_PY2_DEPS: "${{ env.MDA_PIP_MIN_DEPS }} ${{ env.MDA_PIP_EXTRA_DEPS }} ${{ env.MDA_PIP_PY2_DEPS }}"
+        MDA_CONDA_FULLPY2_DEPS: "${{ env.MDA_CONDA_MIN_DEPS }} ${{ env.MDA_CONDA_EXTRA_DEPS }} ${{ env.MDA_CONDA_PY2_DEPS }}"
+        MDA_PIP_FULLPY2_DEPS: "${{ env.MDA_PIP_MIN_DEPS }} ${{ env.MDA_PIP_EXTRA_DEPS }} ${{ env.MDA_PIP_PY2_DEPS }}"
       run: |
         # NOTE: vars need to be re-assigned
         # NOTE: set matrix.numpy to pin to a specific numpy version
