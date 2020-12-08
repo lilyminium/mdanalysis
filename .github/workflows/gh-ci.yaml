@@ -125,8 +125,6 @@ jobs:
         # NOTE: set matrix.numpy to pin to a specific numpy version
         conda_deps="${{ matrix.numpy }} ${MDA_CONDA_${{ matrix.run_type }}_DEPS}"
         pip_deps=${MDA_PIP_${{ matrix.run_type }}_DEPS}
-
-        echo $pip_deps
         conda install ${conda_deps}
         pip install ${pip_deps}
 
