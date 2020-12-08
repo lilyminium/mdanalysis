@@ -268,8 +268,15 @@ def extensions(config):
     use_cython = config.get('use_cython', default=not is_release)
     use_openmp = config.get('use_openmp', default=True)
 
-    extra_compile_args = ['-std=c99', '-ffast-math', '-O3', '-funroll-loops',
-                          '-fsigned-zeros']  # see #2722
+    if platform.machine() == 'aarch64':
+        # reduce optimization level for ARM64 machines
+        # because of issues with test failures sourcing to:
+        # MDAnalysis/analysis/encore/clustering/src/ap.c
+        extra_compile_args = ['-std=c99', '-ffast-math', '-O1', '-funroll-loops',
+                              '-fsigned-zeros']
+    else:
+        extra_compile_args = ['-std=c99', '-ffast-math', '-O3', '-funroll-loops',
+                              '-fsigned-zeros']  # see #2722
     define_macros = []
     if config.get('debug_cflags', default=False):
         extra_compile_args.extend(['-Wall', '-pedantic'])
@@ -579,13 +586,14 @@ if __name__ == '__main__':
           'biopython>=1.71,<1.77', # to support Py 2
           'networkx>=1.0',
           'GridDataFormats>=0.4.0',
-          'six>=1.4.0',
+          'six>=1.4.0',            # to support Py 2
           'mmtf-python>=1.0.0',
           'joblib>=0.12,<0.15.0',  # to support Py 2
           'scipy>=1.0.0',
           'matplotlib>=1.5.1',
           'mock',
           'tqdm>=4.43.0',
+          'funcsigs',              # to support Py 2
     ]
     if not os.name == 'nt':
         install_requires.append('gsd>=1.4.0')
