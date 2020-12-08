@@ -15,9 +15,11 @@ defaults:
 
 env:
   MDA_CONDA_MIN_DEPS: "pip pytest mmtf-python biopython networkx cython matplotlib scipy griddataformats hypothesis gsd codecov"
-  MDA_CONDA_EXTRA_DEPS: "seaborn>=0.7.0 clustalw=2.1 netcdf4 scikit-learn joblib>=0.12 chemfiles tqdm>=4.43.0 tidynamics>=1.0.0 rdkit>=2020.03.1 h5py==2.10.0"
+  MDA_CONDA_EXTRA_DEPS: "seaborn>=0.7.0 clustalw=2.1 netcdf4 scikit-learn joblib>=0.12 tqdm>=4.43.0"
+  MDA_CONDA_PY2_DEPS: "six funcsigs"
   MDA_PIP_MIN_DEPS: 'coveralls coverage<5 pytest-cov pytest-xdist'
   MDA_PIP_EXTRA_DEPS: 'duecredit parmed'
+  MDA_PIP_PY2_DEPS: "setuptools<45.0.0 chemfiles"
 
 
 jobs:
@@ -28,11 +30,18 @@ jobs:
         fail-fast: false
         matrix:
           os: [ubuntu-latest, ]
-          python-version: [3.6, 3.7, 3.8]
+          python-version: [3.5, 3.6, 3.7, 3.8]
           run_type: [FULL, ]
           install_hole: [true, ]
           codecov: [true, ]
           include:
+            - name: python-2.7
+              os: ubuntu-latest
+              python-version: 2.7
+              install_hole: true
+              codecov: true
+              numpy: numpy=1.16
+              run_type: [FULL_PY2, ]
             - name: macOS
               os: macOS-latest
               python-version: 3.7
@@ -107,8 +116,10 @@ jobs:
         
     - name: install_deps
       env:
-        MDA_CONDA_FULL_DEPS: "${{ env.MDA_CONDA_MIN_DEPS }} ${{ env.MDA_CONDA_EXTRA_DEPS }}"
+        MDA_CONDA_FULL_DEPS: "${{ env.MDA_CONDA_MIN_DEPS }} ${{ env.MDA_CONDA_EXTRA_DEPS }} chemfiles"
         MDA_PIP_FULL_DEPS: "${{ env.MDA_PIP_MIN_DEPS }} ${{ env.MDA_PIP_EXTRA_DEPS }}"
+        MDA_CONDA_FULL_PY2_DEPS: "${{ env.MDA_CONDA_MIN_DEPS }} ${{ env.MDA_CONDA_EXTRA_DEPS }} ${{ env.MDA_CONDA_PY2_DEPS }}"
+        MDA_PIP_FULL_PY2_DEPS: "${{ env.MDA_PIP_MIN_DEPS }} ${{ env.MDA_PIP_EXTRA_DEPS }} ${{ env.MDA_PIP_PY2_DEPS }}"
       run: |
         # NOTE: vars need to be re-assigned
         # NOTE: set matrix.numpy to pin to a specific numpy version
