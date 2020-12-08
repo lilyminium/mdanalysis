@@ -126,7 +126,10 @@ jobs:
         conda_deps="${{ matrix.numpy }} ${MDA_CONDA_${{ matrix.run_type }}_DEPS}"
         pip_deps=${MDA_PIP_${{ matrix.run_type }}_DEPS}
 
-        echo $pip_deps
+        echo ${{ matrix.run_type }}
+
+        echo ${conda_deps}
+        echo ${pip_deps}
 
 
         # also install asv if required
