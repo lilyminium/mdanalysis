@@ -17,7 +17,7 @@ env:
   MDA_CONDA_MIN_DEPS: "pip pytest mmtf-python biopython networkx cython matplotlib scipy griddataformats hypothesis gsd codecov"
   MDA_CONDA_EXTRA_DEPS: "seaborn"
   MDA_CONDA_PY3_DEPS: "netcdf4 scikit-learn joblib>=0.12 clustalw=2.1 chemfiles mock"
-  MDA_CONDA_PY27_DEPS: "scikit-learn six funcsigs mock<=3.0.5"
+  MDA_CONDA_PY27_DEPS: "netcdf4 six funcsigs mock<=3.0.5"
   MDA_CONDA_PY35_DEPS: "netcdf4 scikit-learn joblib>=0.12 clustalw=2.1 mock<=3.0.5"
   MDA_PIP_MIN_DEPS: 'coveralls coverage<5 pytest-cov pytest-xdist'
   MDA_PIP_EXTRA_DEPS: 'duecredit parmed'
