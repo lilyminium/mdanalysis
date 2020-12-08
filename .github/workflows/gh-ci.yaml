@@ -118,7 +118,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         auto-update-conda: true
         channel-priority: flexible
-        channels: biobuilds, conda-forge
+        channels: biobuilds, conda-forge, defaults
         add-pip-as-python-dependency: true
         miniconda-version: ${{ matrix.conda-version }}
         # TODO: mamba causes pip to segfault, switch when fixed
