@@ -118,7 +118,7 @@ jobs:
         channel-priority: flexible
         channels: biobuilds, conda-forge
         add-pip-as-python-dependency: true
-        miniconda-version: 4.7.10
+        conda-version: 4.7.10
         # TODO: mamba causes pip to segfault, switch when fixed
         #mamba-version: "*"
         architecture: x64
