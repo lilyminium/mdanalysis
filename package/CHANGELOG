@@ -77,6 +77,7 @@ Fixes
     would create a test artifact (Issue #2979, PR #2981)
 
 Enhancements
+  * Added del_TopologyAttr function (PR #3069)
   * Added automatic selection class generation for TopologyAttrs,
     FloatRangeSelection, and BoolSelection (Issues #2925, #2875; PR #2927)
   * Added 'to' operator, negatives, scientific notation, and arbitrary
