@@ -299,7 +299,9 @@ class TestRDKitConverter(object):
         positions = mol.GetConformer().GetPositions()
         indices = sorted(mol.GetAtoms(),
                          key=lambda a: a.GetIntProp("_MDAnalysis_index"))
+        assert len(indices) == len(pdb.atoms)
         indices = [a.GetIdx() for a in indices]
+        assert len(indices) == len(pdb.atoms)
         assert_almost_equal(positions[indices], pdb.atoms.positions)
 
     def test_assign_stereochemistry(self, mol2):
