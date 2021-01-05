@@ -23,7 +23,34 @@
 
 import numpy as np
 
+from ..lib.util import iterable
+
 class Clusters:
+    """
+    Class used to contain groups of clusters. Used in
+    LeafletFinder algorithms. Can also be used in clustering.
+
+    Parameters
+    ----------
+    predictor: function, object or class (optional)
+        The associated predictor with the data. Must be provided
+        if you want to use the ``run`` method
+
+    
+    Attributes
+    ----------
+    predictor: function, class or object
+        Provided predictor
+    cluster_indices: list of iterables of integers
+        Indices of the provided data assigned to each cluster
+    clusters_by_size: list of iterables of integers
+        Indices of the provided data assigned to each cluster.
+        The list is sorted by the size of the cluster (largest first)
+    outlier_indices: iterable of indices
+        Indices of the provided data considered to be outliers
+    data_labels: iterable
+        List of cluster labels in the order of the provided data
+    """
     def __init__(self, predictor=None, **kwargs):
         if isinstance(predictor, type):
             predictor = predictor(**kwargs)
@@ -32,20 +59,37 @@ class Clusters:
         self.clusters_by_size = []
         self.outlier_indices = []
         self.data_labels = []
+
+    def __len__(self):
+        return len(self.cluster_indices)
     
     def run(self, data):
-        self.data_labels = self.predictor.fit_predict(data)
+        """
+        Run the given predictor on the given data,
+        and assign clusters.
+        """
+        try:
+            self.data_labels = self.predictor.fit_predict(data)
+        except AttributeError:
+            raise ValueError("predictor must have a `fit_predict` "
+                             "method that returns an iterable of labels")
+        if not iterable(self.data_labels):
+            raise ValueError("predictor.fit_predict must return an iterable "
+                             "of labels")
         ix = np.argsort(self.data_labels)
         indices = np.arange(len(data))
         splix = np.where(np.ediff1d(self.data_labels[ix]))[0] + 1
-        self.cluster_indices = np.split(indices[ix], splix)
-        self.cluster_indices = [np.sort(x) for x in self.cluster_indices]
+        cluster_indices = np.split(indices[ix], splix)
+        self.cluster_indices = [np.sort(x) for x in cluster_indices]
         if self.data_labels[ix[0]] == -1:
             self.outlier_indices = self.cluster_indices.pop(0)
         self.clusters_by_size = sorted(self.cluster_indices,
                                        key=lambda x: len(x), reverse=True)
 
     def set_clusters(self, cluster_indices):
+        """
+        Set cluster data from values. No predictor is necessary here.
+        """
         self.cluster_indices = cluster_indices
         self.clusters_by_size = sorted(self.cluster_indices,
                                        key=lambda x: len(x), reverse=True)

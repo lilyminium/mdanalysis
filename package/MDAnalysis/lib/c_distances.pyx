@@ -59,7 +59,6 @@ cdef extern from "calc_distances.h":
     void _triclinic_pbc(coordinate* coords, int numcoords, float* box)
     void minimum_image(double* x, float* box, float* inverse_box)
     void _unwrap_around(coordinate* coords, int numCoords, float* center, float* box)
-    void _calc_cosine_similarity(coordinate* vec1, int numVec1, coordinate* vec2, int numVec2, double* cosines)
 
 OPENMP_ENABLED = True if USED_OPENMP else False
 
@@ -233,17 +232,6 @@ def unwrap_around(numpy.ndarray coords, numpy.ndarray center,
                    <float*> center.data, <float*> box.data)
     return coords
 
-def calc_cosine_similarity(numpy.ndarray vectors1, numpy.ndarray vectors2):
-    vectors1 = numpy.ascontiguousarray(vectors1)
-    vectors2 = numpy.ascontiguousarray(vectors2)
-    cdef int numVec1 = vectors1.shape[0]
-    cdef int numVec2 = vectors2.shape[0]
-    cdef numpy.ndarray cosines = numpy.empty((numVec1, numVec2))
-
-    _calc_cosine_similarity(<coordinate*> vectors1.data, numVec1, 
-                            <coordinate*> vectors2.data, numVec2,
-                            <double*> cosines.data)
-    return cosines
 
 @cython.boundscheck(False)
 def contact_matrix_no_pbc(coord, sparse_contacts, cutoff):

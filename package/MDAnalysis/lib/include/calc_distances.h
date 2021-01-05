@@ -887,32 +887,3 @@ static void _unwrap_around(coordinate* coords, int numCoords,
     coords[i][2] -= (fabs(dz) > half_z) * copysign(box[2], dz);
   }
 }
-
-static inline double _calc_norm_vec3(float* vec)
-{
-  return sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
-}
-
-static inline double _calc_dot_vec3(float* vec1, float* vec2)
-{
-  return vec1[0]*vec2[0] + vec1[1]*vec2[1] + vec1[2]*vec2[2];
-}
-
-
-void _calc_cosine_similarity(coordinate* vec1, int numVec1,
-                             coordinate* vec2, int numVec2,
-                             double* cosines)
-{
-  double norm2[numVec2];
-
-  for (int j=0; j<numVec2; j++) {
-    norm2[j] = _calc_norm_vec3(vec2[j]);
-  }
-
-  for (int i=0; i<numVec1; i++) {
-    double norm_i = _calc_norm_vec3(vec1[i]);
-    for (int j=0; j<numVec2; j++) {
-      *(cosines + i*numVec2 + j) = _calc_dot_vec3(vec1[i], vec2[j]) / (norm_i * norm2[j]);
-    }
-  }
-}

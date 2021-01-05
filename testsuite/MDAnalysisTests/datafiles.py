@@ -153,9 +153,7 @@ __all__ = [
     "COORDINATES_GRO",
     "COORDINATES_GRO_INCOMPLETE_VELOCITY",
     "Martini_membrane_gro", # for testing the leaflet finder
-    "Martini_double_membrane",  # for testing leaflet finder more
     "DPPC_vesicle_only", # leaflet finder on vesicle
-    "DPPC_vesicle_plus", # leaflet finder on vesicle
     "COORDINATES_XTC",
     "COORDINATES_TRR",
     "COORDINATES_H5MD",
@@ -503,9 +501,7 @@ fullerene = resource_filename(__name__, 'data/fullerene.pdb.gz')
 
 Plength = resource_filename(__name__, 'data/plength.gro')
 Martini_membrane_gro = resource_filename(__name__, 'data/martini_dppc_chol_bilayer.gro')
-Martini_double_membrane = resource_filename(__name__, 'data/martini_double_bilayer.gro')
 DPPC_vesicle_only = resource_filename(__name__, 'data/fatslim_dppc_vesicle.pdb')
-DPPC_vesicle_plus = resource_filename(__name__, 'data/fatslim_dppc_vesicle_plus.gro')
 
 # Contains one of each residue in 'nucleic' selections
 NUCLsel = resource_filename(__name__, 'data/nucl_res.pdb')
