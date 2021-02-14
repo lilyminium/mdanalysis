@@ -15,11 +15,21 @@ The rules for this file:
 ------------------------------------------------------------------------------
 ??/??/?? tylerjereddy, richardjgowers, IAlibay, hmacdope, orbeckst, cbouy,
          lilyminium, daveminh, jbarnoud, yuxuanzhuang, VOD555, ianmkenney,
-         calcraven，xiki-tempula, mieczyslaw, manuel.nuno.melo
+         calcraven，xiki-tempula, mieczyslaw, manuel.nuno.melo, PicoCentauri,
+         hanatok, rmeli
 
   * 2.0.0
 
 Fixes
+  * Write `CONECT` record only once in multi-model PDB files (Issue #3018)
+  * Add '.nc' as a recognised extension for the NCDFWriter (Issue #3030)
+  * PDB parser now assigns empty records for partially missing/invalid elements
+    instead of not assigning the elements attribute at all (Issue #2422)
+  * PDB writer now uses elements attribute instead of guessing elements from
+    atom name (Issue #2423)
+  * Cleanup and parametrization of test_atomgroup.py (Issue #2995)
+  * The methods provided by topology attributes now appear in the
+    documentation (Issue #1845)
   * AtomGroup.center now works correctly for compounds + unwrapping
     (Issue #2984)
   * Avoid using deprecated array indexing in topology attributes
@@ -66,6 +76,11 @@ Fixes
     would create a test artifact (Issue #2979, PR #2981)
 
 Enhancements
+  * Improved performance of the ParmEd converter (Issue #3028, PR #3029)
+  * Improved analysis class docstrings, and added missing classes to the 
+    `__all__` list (PR #2998)
+  * The PDB writer gives more control over how to write the atom ids
+    (Issue #1072, PR #2886)
   * Preliminary support for the Linux ARM64 platform with minimal
     dependencies (PR #2956)
   * Refactored analysis.helanal into analysis.helix_analysis
