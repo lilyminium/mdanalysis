@@ -153,16 +153,30 @@ class LipidFlipFlop(LeafletAnalysis):
         self.flip_sections = np.zeros(self.n_residues)
         self.flop_sections = np.zeros(self.n_residues)
 
+        self.upper = {}
+        self.lower = {}
+        self.inter = {}
+
+        for x in np.unique(self.ids):
+            self.upper[x] = np.zeros(self.n_frames)
+            self.lower[x] = np.zeros(self.n_frames)
+            self.inter[x] = np.zeros(self.n_frames)
+
         if not self.n_frames:
             return
 
         for i in range(self.n_residues):
-            trans = self.residue_leaflet[:, i]
-            trans = trans[trans != -1]
+            row = self.residue_leaflet[:, i]
+            trans = row[row != -1]
             diff = trans[1:] - trans[:-1]
 
             self.flips[i] = np.sum(diff > 0)  # 0: upper, 1: lower
             self.flops[i] = np.sum(diff < 0)
+
+            id_ = self.ids[i]
+            self.upper[id_][row == 0] += 1
+            self.lower[id_][row == 1] += 1
+            self.inter[id_][row == -1] += 1
         
         self.translocations = self.flips + self.flops
 

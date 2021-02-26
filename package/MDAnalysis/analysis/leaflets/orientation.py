@@ -58,8 +58,11 @@ class Orientation(AnalysisBase):
     
 class LipidOrientation(LeafletAnalysis):
 
-    def __init__(self, universe, *args, **kwargs):
+    def __init__(self, universe, *args, full_sel=None, **kwargs):
         super().__init__(universe, *args, **kwargs)
+        self.full_sel = self.universe.select_atoms(full_sel)
+        print(self.full_sel.atoms.names)
+        self.norm = np.linalg.norm([0, 0, 1])
 
     def _prepare(self):
         shape = (self.n_frames, self.n_leaflets, self.n_residues)
@@ -76,7 +79,9 @@ class LipidOrientation(LeafletAnalysis):
                                             box=box,
                                             headgroup_centers=coords,
                                             normalize=True)
-            leaflet_row[res_indices] = np.arccos(orientations[:, 2])
+            
+            angles = [np.dot(x, [0, 0, 1])/(np.linalg.norm(x)*self.norm) for x in orientations]
+            leaflet_row[res_indices] = np.arccos(angles)
     
     def _conclude(self):
         self.degrees = np.rad2deg(self.orientations)

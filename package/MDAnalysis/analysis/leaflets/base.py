@@ -159,7 +159,7 @@ class LeafletAnalysis(BaseLeafletAnalysis):
                 if  np.any(~nan_mask):
                     comp_dists[nan_mask] = np.inf
                 else:
-                    comp_dists = [distance_array(x, xyz).mean() 
+                    comp_dists = [distance_array(x, xyz, box=box).mean() 
                                 for x in self.leafletfinder.positions]
                 self._relevant_rix[np.argmin(comp_dists)].append(i)
 
