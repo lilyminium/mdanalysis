@@ -1,5 +1,5 @@
 # -*- Mode: python; tab-width: 4; indent-tabs-mode:nil; coding:utf-8 -*-
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 #
 # MDAnalysis --- https://www.mdanalysis.org
 # Copyright (c) 2006-2017 The MDAnalysis Development Team and contributors
@@ -150,6 +150,7 @@ from ..core.topologyattrs import (
     Angles,
     Dihedrals,
     Impropers,
+    Pairs,
     AtomAttr,
 )
 from ..core.topology import Topology
@@ -215,7 +216,7 @@ class GmxTopIterator:
         except ValueError:
             _, variable = line.split()
             value = True
-        
+
         # kwargs overrides files
         if variable not in self._original_defines:
             self.defines[variable] = value
@@ -251,7 +252,7 @@ class GmxTopIterator:
                 break
         else:
             raise IOError('Missing #endif in {}'.format(self.current_file))
-    
+
     def skip_until_endif(self, infile):
         """Skip lines until #endif"""
         for line in self.clean_file_lines(infile):
@@ -301,6 +302,7 @@ class Molecule:
         self.angles = defaultdict(list)
         self.dihedrals = defaultdict(list)
         self.impropers = defaultdict(list)
+        self.pairs = defaultdict(list)
 
         self.parsers = {
             'atoms': self.parse_atoms,
@@ -308,21 +310,22 @@ class Molecule:
             'angles': self.parse_angles,
             'dihedrals': self.parse_dihedrals,
             'constraints': self.parse_constraints,
-            'settles': self.parse_settles
+            'settles': self.parse_settles,
+            'pairs': self.parse_pairs,
         }
 
         self.resolved_residue_attrs = False
 
     @property
     def atom_order(self):
-        return [self.ids, self.types, self.resids, self.resnames, 
-                self.names, self.chargegroups, self.charges, 
+        return [self.ids, self.types, self.resids, self.resnames,
+                self.names, self.chargegroups, self.charges,
                 self.masses]
 
     @property
     def params(self):
-        return [self.bonds, self.angles, self.dihedrals, self.impropers]
-    
+        return [self.bonds, self.angles, self.dihedrals, self.impropers, self.pairs]
+
     def parse_atoms(self, line):
         values = line.split()
         for lst in self.atom_order:
@@ -330,17 +333,17 @@ class Molecule:
                 lst.append(values.pop(0))
             except IndexError:  # ran out of values
                 lst.append('')
-    
+
     def parse_bonds(self, line):
-        self.add_param(line, self.bonds, n_funct=2, 
+        self.add_param(line, self.bonds, n_funct=2,
                        funct_values=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
-    
+
     def parse_angles(self, line):
-        self.add_param(line, self.angles, n_funct=3, 
+        self.add_param(line, self.angles, n_funct=3,
                        funct_values=(1, 2, 3, 4, 5, 6, 8, 10))
-    
+
     def parse_dihedrals(self, line):
-        dih = self.add_param(line, self.dihedrals, n_funct=4, 
+        dih = self.add_param(line, self.dihedrals, n_funct=4,
                              funct_values=(1, 3, 5, 8, 9, 10, 11))
         if not dih:
             self.add_param(line, self.impropers, n_funct=4,
@@ -349,12 +352,15 @@ class Molecule:
     def parse_constraints(self, line):
         self.add_param(line, self.bonds, n_funct=2, funct_values=(1, 2))
 
+    def parse_pairs(self, line):
+        self.add_param(line, self.pairs, n_funct=2, funct_values=(1,))
+
     def parse_settles(self, line):
-        # [ settles ] is a triangular constraint for 
+        # [ settles ] is a triangular constraint for
         # water molecules.
-        # In ITP files this is defined with only the 
-        # oxygen atom index. The next two atoms are 
-        # assumed to be hydrogens. Unlike TPRParser,  
+        # In ITP files this is defined with only the
+        # oxygen atom index. The next two atoms are
+        # assumed to be hydrogens. Unlike TPRParser,
         # the manual only lists this format (as of 2019).
         # These are treated as 2 bonds and 1 angle.
         oxygen, funct, doh, dhh = line.split()
@@ -371,7 +377,8 @@ class Molecule:
         """Figure out residue borders and assign moltypes and molnums"""
         resids = np.array(self.resids, dtype=np.int32)
         resnames = np.array(self.resnames, dtype=object)
-        self.residx, (self.resids, resnames) = change_squash((resids,), (resids, resnames))
+        self.residx, (self.resids, resnames) = change_squash(
+            (resids,), (resids, resnames))
         self.resnames = list(resnames)
         self.moltypes = [self.name] * len(self.resids)
         self.molnums = np.array([1] * len(self.resids))
@@ -410,8 +417,8 @@ class Molecule:
             cg = np.arange(1, len(self.chargegroups)+1)
         chargegroups = list(cg+cgnr)
 
-        atom_order = [ids, self.types, resids, self.resnames, 
-                      self.names, chargegroups, self.charges, 
+        atom_order = [ids, self.types, resids, self.resnames,
+                      self.names, chargegroups, self.charges,
                       self.masses]
 
         new_params = []
@@ -430,8 +437,8 @@ class Molecule:
         if funct in funct_values:
             try:
                 ids = self.index_ids(values[:n_funct])
-                container[ids].append(funct)
-            except ValueError:
+                container[ids].append(' '.join(values[n_funct:]))
+            except ValueError as e:
                 pass
             return True
         else:
@@ -498,7 +505,7 @@ class ITPParser(TopologyReaderBase):
         self._molecules = []  # for order
         self.current_mol = None
         self.parser = self._pass
-        self.system_molecules = []        
+        self.system_molecules = []
 
         # Open and check itp validity
         with openany(self.filename) as itpfile:
@@ -515,13 +522,14 @@ class ITPParser(TopologyReaderBase):
 
                     elif section == 'molecules':
                         self.parser = self.parse_molecules
-                    
+
                     elif self.current_mol:
-                        self.parser = self.current_mol.parsers.get(section, self._pass)
-                    
+                        self.parser = self.current_mol.parsers.get(
+                            section, self._pass)
+
                     else:
                         self.parser = self._pass
-                
+
                 else:
                     self.parser(line)
 
@@ -587,7 +595,7 @@ class ITPParser(TopologyReaderBase):
         attrs.append(Resnames(resnames))
         attrs.append(Moltypes(np.array(self.moltypes, dtype=object)))
         attrs.append(Molnums(molnums))
-        
+
         n_atoms = len(self.ids)
         n_residues = len(self.resids)
         n_segments = len(self.system_molecules)
@@ -604,7 +612,8 @@ class ITPParser(TopologyReaderBase):
             (self.bonds, Bonds, 'bonds'),
             (self.angles, Angles, 'angles'),
             (self.dihedrals, Dihedrals, 'dihedrals'),
-            (self.impropers, Impropers, 'impropers')
+            (self.impropers, Impropers, 'impropers'),
+            (self.pairs, Pairs, 'pairs'),
         ):
             if dct:
                 indices, types = zip(*list(dct.items()))
@@ -612,7 +621,7 @@ class ITPParser(TopologyReaderBase):
                 indices, types = [], []
 
             types = [reduce_singular(t) for t in types]
-            
+
             tattr = Attr(indices, types=types)
             top.add_TopologyAttr(tattr)
 
@@ -657,16 +666,18 @@ class ITPParser(TopologyReaderBase):
         self.molnums = []
         self.residx = []
 
-        self.atom_order = [self.ids, self.types, self.resids, self.resnames, 
-                           self.names, self.chargegroups, self.charges, 
+        self.atom_order = [self.ids, self.types, self.resids, self.resnames,
+                           self.names, self.chargegroups, self.charges,
                            self.masses]
 
         self.bonds = defaultdict(list)
         self.angles = defaultdict(list)
         self.dihedrals = defaultdict(list)
         self.impropers = defaultdict(list)
+        self.pairs = defaultdict(list)
 
-        self.params = [self.bonds, self.angles, self.dihedrals, self.impropers]
+        self.params = [self.bonds, self.angles,
+                       self.dihedrals, self.impropers, self.pairs]
 
         for i, moltype in enumerate(self.system_molecules):
             mol = self.molecules[moltype]
@@ -677,7 +688,7 @@ class ITPParser(TopologyReaderBase):
             n_res = len(self.resids)
             n_atoms = len(self.ids)
 
-            shifted = mol.shift_indices(atomid=atomid, resid=resid, 
+            shifted = mol.shift_indices(atomid=atomid, resid=resid,
                                         n_res=n_res, cgnr=cgnr, molnum=i,
                                         n_atoms=n_atoms)
             atom_order, params, molnums, moltypes, residx = shifted

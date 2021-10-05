@@ -91,7 +91,6 @@ from .topologyobjects import TopologyObject
 logger = logging.getLogger("MDAnalysis.core.universe")
 
 
-
 def _check_file_like(topology):
     if isstream(topology):
         if hasattr(topology, 'name'):
@@ -100,6 +99,7 @@ def _check_file_like(topology):
             _name = None
         return NamedStream(topology, _name)
     return topology
+
 
 def _topology_from_file_like(topology_file, topology_format=None,
                              **kwargs):
@@ -113,14 +113,14 @@ def _topology_from_file_like(topology_file, topology_format=None,
         # one because the file isn't present
         # or the permissions are bad, second when the parser fails
         if (err.errno is not None and
-            errno.errorcode[err.errno] in ['ENOENT', 'EACCES']):
+                errno.errorcode[err.errno] in ['ENOENT', 'EACCES']):
             # Runs if the error is propagated due to no permission / file not found
             raise sys.exc_info()[1] from err
         else:
             # Runs when the parser fails
             raise IOError("Failed to load from the topology file {0}"
-                            " with parser {1}.\n"
-                            "Error: {2}".format(topology_file, parser, err))
+                          " with parser {1}.\n"
+                          "Error: {2}".format(topology_file, parser, err))
     except (ValueError, NotImplementedError) as err:
         raise ValueError(
             "Failed to construct topology from file {0}"
@@ -145,10 +145,11 @@ def _resolve_coordinates(filename, *coordinates, format=None,
             get_reader_for(filename, format=format)
         except ValueError:
             warnings.warn('No coordinate reader found for {}. Skipping '
-                            'this file.'.format(filename))
+                          'this file.'.format(filename))
         else:
             coordinates = (filename,) + coordinates
     return coordinates
+
 
 def _generate_from_topology(universe):
     # generate Universe version of each class
@@ -168,10 +169,10 @@ def _generate_from_topology(universe):
     universe.atoms = AtomGroup(np.arange(universe._topology.n_atoms), universe)
 
     universe.residues = ResidueGroup(
-            np.arange(universe._topology.n_residues), universe)
+        np.arange(universe._topology.n_residues), universe)
 
     universe.segments = SegmentGroup(
-            np.arange(universe._topology.n_segments), universe)
+        np.arange(universe._topology.n_segments), universe)
 
 
 class Universe(object):
@@ -292,6 +293,7 @@ class Universe(object):
         ``topology`` and ``trajectory`` are reserved
         upon unpickle.
     """
+
     def __init__(self, topology=None, *coordinates, all_coordinates=False,
                  format=None, topology_format=None, transformations=None,
                  guess_bonds=False, vdwradii=None, in_memory=False,
@@ -341,7 +343,7 @@ class Universe(object):
 
         if coordinates:
             self.load_new(coordinates, format=format, in_memory=in_memory,
-                        in_memory_step=in_memory_step, **kwargs)
+                          in_memory_step=in_memory_step, **kwargs)
 
         if transformations:
             if callable(transformations):
@@ -432,7 +434,7 @@ class Universe(object):
         top = Topology(n_atoms, n_residues, n_segments,
                        atom_resindex=atom_resindex,
                        residue_segindex=residue_segindex,
-        )
+                       )
 
         u = cls(top)
 
@@ -631,6 +633,11 @@ class Universe(object):
     def bonds(self):
         """Bonds between atoms"""
         return self.atoms.bonds
+
+    @property
+    def pairs(self):
+        """Pairs between atoms"""
+        return self.atoms.pairs
 
     @property
     def angles(self):
@@ -938,7 +945,8 @@ class Universe(object):
         # pass this information to the topology
         residx = self._topology.add_Residue(segment, **attrs)
         # resize my residues
-        self.residues = ResidueGroup(np.arange(self._topology.n_residues), self)
+        self.residues = ResidueGroup(
+            np.arange(self._topology.n_residues), self)
 
         # return the new residue
         return self.residues[residx]
@@ -965,12 +973,13 @@ class Universe(object):
         # pass this information to the topology
         segidx = self._topology.add_Segment(**attrs)
         # resize my segments
-        self.segments = SegmentGroup(np.arange(self._topology.n_segments), self)
+        self.segments = SegmentGroup(
+            np.arange(self._topology.n_segments), self)
         # return the new segment
         return self.segments[segidx]
 
     def _add_topology_objects(self, object_type, values, types=None, guessed=False,
-                           order=None):
+                              order=None):
         """Add new TopologyObjects to this Universe
 
         Parameters
@@ -1024,7 +1033,6 @@ class Universe(object):
             self.add_TopologyAttr(object_type, [])
             attr = getattr(self._topology, object_type)
 
-
         attr._add_bonds(indices, types=types, guessed=guessed, order=order)
 
     def add_bonds(self, values, types=None, guessed=False, order=None):
@@ -1074,7 +1082,7 @@ class Universe(object):
         .. versionadded:: 1.0.0
         """
         self._add_topology_objects('bonds', values, types=types,
-                                 guessed=guessed, order=order)
+                                   guessed=guessed, order=order)
         # Invalidate bond-related caches
         self._cache.pop('fragments', None)
         self._cache['_valid'].pop('fragments', None)
@@ -1099,7 +1107,7 @@ class Universe(object):
         .. versionadded:: 1.0.0
         """
         self._add_topology_objects('angles', values, types=types,
-                                 guessed=guessed)
+                                   guessed=guessed)
 
     def add_dihedrals(self, values, types=None, guessed=False):
         """Add new Dihedrals to this Universe.
@@ -1121,7 +1129,7 @@ class Universe(object):
         .. versionadded:: 1.0.0
         """
         self._add_topology_objects('dihedrals', values, types=types,
-                                 guessed=guessed)
+                                   guessed=guessed)
 
     def add_impropers(self, values, types=None, guessed=False):
         """Add new Impropers to this Universe.
@@ -1143,7 +1151,7 @@ class Universe(object):
         .. versionadded:: 1.0.0
         """
         self._add_topology_objects('impropers', values, types=types,
-                                 guessed=guessed)
+                                   guessed=guessed)
 
     def _delete_topology_objects(self, object_type, values):
         """Delete TopologyObjects from this Universe
@@ -1371,12 +1379,12 @@ class Universe(object):
         if generate_coordinates:
             if not addHs:
                 raise ValueError("Generating coordinates requires adding "
-                "hydrogens with `addHs=True`")
+                                 "hydrogens with `addHs=True`")
 
             numConfs = rdkit_kwargs.pop("numConfs", numConfs)
             if not (type(numConfs) is int and numConfs > 0):
                 raise SyntaxError("numConfs must be a non-zero positive "
-                "integer instead of {0}".format(numConfs))
+                                  "integer instead of {0}".format(numConfs))
             AllChem.EmbedMultipleConfs(mol, numConfs, **rdkit_kwargs)
 
         return cls(mol, **kwargs)
@@ -1464,7 +1472,8 @@ def Merge(*args):
     blank_topology_attrs = set(dir(Topology(attrs=[])))
     common_attrs = set.intersection(*[set(dir(ag.universe._topology))
                                       for ag in args])
-    tops = set(['bonds', 'angles', 'dihedrals', 'impropers'])
+    tops = set(['bonds', 'angles', 'dihedrals', 'impropers',
+                'pairs', 'ureybradleys', 'cmaps'])
 
     attrs = []
 
@@ -1516,17 +1525,19 @@ def Merge(*args):
             tg = tg.atomgroup_intersection(ag, strict=True)
 
             # Map them so they refer to our new indices
-            new_idx = [tuple([mapping[x] for x in entry]) for entry in tg.indices]
+            new_idx = [tuple([mapping[x] for x in entry])
+                       for entry in tg.indices]
             bondidx.extend(new_idx)
             if hasattr(tg, '_bondtypes'):
                 types.extend(tg._bondtypes)
             else:
                 types.extend([None]*len(tg))
-        if any(t is None for t in types):
-            attrs.append(bonds_class(bondidx))
-        else:
-            types = np.array(types, dtype='|S8')
-            attrs.append(bonds_class(bondidx, types))
+        if len(bondidx):
+            if any(t is None for t in types):
+                attrs.append(bonds_class(bondidx))
+            else:
+                types = np.array(types, dtype=object)
+                attrs.append(bonds_class(bondidx, types))
 
     # Renumber residue and segment indices
     n_atoms = sum([len(ag) for ag in args])
@@ -1562,12 +1573,12 @@ def Merge(*args):
 
     # Create and populate a universe
     try:
-        #Create universe with coordinates if they exists in args
+        # Create universe with coordinates if they exists in args
         coords = np.vstack([a.positions for a in args])
         u = Universe(top, coords[None, :, :],
-                 format=MDAnalysis.coordinates.memory.MemoryReader)
+                     format=MDAnalysis.coordinates.memory.MemoryReader)
     except AttributeError:
-        #Create universe without coordinates if they dont exists in args
+        # Create universe without coordinates if they dont exists in args
         u = Universe(top)
 
     return u

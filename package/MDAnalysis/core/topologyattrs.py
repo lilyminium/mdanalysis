@@ -191,6 +191,7 @@ def _build_stub(method_name, method, attribute_name):
     -------
     The stub.
     """
+
     def stub_method(self, *args, **kwargs):
         message = (
             '{class_name}.{method_name}() '
@@ -305,7 +306,6 @@ class _TopologyAttrMeta(type):
 
     """
     def __init__(cls, name, bases, classdict):
-        type.__init__(type, name, bases, classdict)
         attrname = classdict.get('attrname')
         singular = classdict.get('singular', attrname)
 
@@ -707,7 +707,8 @@ class _AtomStringAttr(AtomAttr):
                     newnames.append(val)
                     newidx[i] = nextidx
 
-        self.nmidx[ag.ix] = newidx  # newidx either single value or same size array
+        # newidx either single value or same size array
+        self.nmidx[ag.ix] = newidx
         if newnames:
             self.name_lookup = np.concatenate([self.name_lookup, newnames])
         self.values = self.name_lookup[self.nmidx]
@@ -2053,7 +2054,8 @@ class _ResidueStringAttr(ResidueAttr):
                     newnames.append(val)
                     newidx[i] = nextidx
 
-        self.nmidx[rg.ix] = newidx  # newidx either single value or same size array
+        # newidx either single value or same size array
+        self.nmidx[rg.ix] = newidx
         if newnames:
             self.name_lookup = np.concatenate([self.name_lookup, newnames])
         self.values = self.name_lookup[self.nmidx]
@@ -2289,7 +2291,8 @@ class _SegmentStringAttr(SegmentAttr):
                     newnames.append(val)
                     newidx[i] = nextidx
 
-        self.nmidx[sg.ix] = newidx  # newidx either single value or same size array
+        # newidx either single value or same size array
+        self.nmidx[sg.ix] = newidx
         if newnames:
             self.name_lookup = np.concatenate([self.name_lookup, newnames])
         self.values = self.name_lookup[self.nmidx]
@@ -2371,7 +2374,7 @@ class _Connection(AtomAttr, metaclass=_ConnectionTopologyAttrMeta):
         self.values = values
         if types is None:
             types = [None] * len(values)
-        self.types = types
+        self.types = list(types)
         if guessed in (True, False):
             # if single value passed, multiply this across
             # all bonds
@@ -2618,6 +2621,21 @@ class Bonds(_Connection):
     transplants[AtomGroup].append(
         ('n_fragments', property(n_fragments, None, None,
                                  n_fragments.__doc__)))
+
+
+class Pairs(_Connection):
+    """Angles between two atoms
+
+    Initialise with a list of 2 long tuples
+
+    These indices refer to the atom indices.
+
+    .. versionadded:: 1.0.0
+    """
+    attrname = 'pairs'
+    singular = 'pairs'
+    transplants = defaultdict(list)
+    _n_atoms = 2
 
 
 class UreyBradleys(_Connection):

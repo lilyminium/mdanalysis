@@ -204,6 +204,10 @@ class Bond(TopologyObject):
     value = length
 
 
+class Pair(Bond):
+    btype = 'pair'
+
+
 class Angle(TopologyObject):
 
     """An angle between three :class:`~MDAnalysis.core.groups.Atom` instances.
@@ -508,8 +512,9 @@ class TopologyDict(object):
         return other in self.dict or other[::-1] in self.dict
 
 
-_BTYPE_TO_SHAPE = {'bond': 2, 'ureybradley': 2, 'angle': 3, 
-                   'dihedral': 4, 'improper': 4, 'cmap': 5}
+_BTYPE_TO_SHAPE = {'bond': 2, 'ureybradley': 2, 'angle': 3,
+                   'dihedral': 4, 'improper': 4, 'cmap': 5,
+                   'pair': 2}
 
 
 class TopologyGroup(object):
@@ -568,6 +573,7 @@ class TopologyGroup(object):
        ``type``, ``guessed``, and ``order`` are no longer reshaped to arrays
        with an extra dimension
     """
+
     def __init__(self, bondidx, universe, btype=None, type=None, guessed=None,
                  order=None):
         if btype is None:
@@ -806,6 +812,7 @@ class TopologyGroup(object):
         # Grab a single Item, similar to Atom/AtomGroup relationship
         if isinstance(item, numbers.Integral):
             outclass = {'bond': Bond,
+                        'pair': Pair,
                         'angle': Angle,
                         'dihedral': Dihedral,
                         'improper': ImproperDihedral,
