@@ -1,26 +1,74 @@
 [
   {
+    "version": "0.20.1",
+    "display": "0.20.1",
+    "url": "https://docs.mdanalysis.org/0.20.1",
+    "latest": false
+  },
+  {
     "version": "1.0.0",
     "display": "1.0.0",
-    "url": "https://minium.com.au/mdanalysis/1.0.0",
-    "latest": true
+    "url": "https://docs.mdanalysis.org/1.0.0",
+    "latest": false
+  },
+  {
+    "version": "1.0.1",
+    "display": "1.0.1",
+    "url": "https://docs.mdanalysis.org/1.0.1",
+    "latest": false
   },
   {
     "version": "1.0.1-dev",
     "display": "1.0.1-dev",
-    "url": "https://minium.com.au/mdanalysis/1.0.1-dev",
+    "url": "https://docs.mdanalysis.org/1.0.1-dev",
     "latest": false
+  },
+  {
+    "version": "1.0.2-dev0",
+    "display": "1.0.2-dev0",
+    "url": "https://docs.mdanalysis.org/1.0.2-dev0",
+    "latest": false
+  },
+  {
+    "version": "1.1.0",
+    "display": "1.1.0",
+    "url": "https://docs.mdanalysis.org/1.1.0",
+    "latest": false
+  },
+  {
+    "version": "1.1.1",
+    "display": "1.1.1",
+    "url": "https://docs.mdanalysis.org/1.1.1",
+    "latest": false
+  },
+  {
+    "version": "2.0.0",
+    "display": "2.0.0",
+    "url": "https://docs.mdanalysis.org/2.0.0",
+    "latest": true
   },
   {
     "version": "2.0.0-dev0",
     "display": "2.0.0-dev0",
-    "url": "https://minium.com.au/mdanalysis/2.0.0-dev0",
+    "url": "https://docs.mdanalysis.org/2.0.0-dev0",
+    "latest": false
+  },
+  {
+    "version": "2.1.0-dev0",
+    "display": "2.1.0-dev0",
+    "url": "https://docs.mdanalysis.org/2.1.0-dev0",
     "latest": false
   },
   {
     "version": "dev",
     "display": "dev",
-    "url": "https://minium.com.au/mdanalysis/dev",
+    "url": "https://docs.mdanalysis.org/dev",
+    "latest": false
+  },
+  {
+    "version": "stable",
+    "display": "stable",
+    "url": "https://docs.mdanalysis.org/stable",
     "latest": false
   }
 ]
