@@ -22,7 +22,7 @@ defaults:
 
 jobs:
   main_tests:
-    if: "github.repository == 'lilyminium/mdanalysis'"
+    if: "github.repository == 'MDAnalysis/mdanalysis'"
     runs-on: ${{ matrix.os }}
     strategy:
         fail-fast: false
@@ -250,7 +250,7 @@ jobs:
 
 
   pypi_check:
-    if: "github.repository == 'lilyminium/mdanalysis'"
+    if: "github.repository == 'MDAnalysis/mdanalysis'"
     runs-on: ubuntu-latest
 
     steps:
