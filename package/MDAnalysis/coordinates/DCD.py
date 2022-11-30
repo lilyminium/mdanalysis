@@ -68,6 +68,7 @@ from ..exceptions import NoDataError
 from . import base, core
 from ..lib.formats.libdcd import DCDFile
 from ..lib.mdamath import triclinic_box
+from ..lib.util import store_init_arguments
 
 
 class DCDReader(base.ReaderBase):
@@ -113,6 +114,7 @@ class DCDReader(base.ReaderBase):
     flavor = 'CHARMM'
     units = {'time': 'AKMA', 'length': 'Angstrom'}
 
+    @store_init_arguments
     def __init__(self, filename, convert_units=True, dt=None, **kwargs):
         """
         Parameters
@@ -320,6 +322,13 @@ class DCDWriter(base.WriterBase):
     in Å and angle-cosines, ``[A, cos(gamma), B, cos(beta), cos(alpha), C]``)
     and writes positions in Å and time in AKMA time units.
 
+
+    .. note::
+        When writing out timesteps without ``dimensions`` (i.e. set ``None``)
+        the :class:`DCDWriter` will write out a zeroed unitcell (i.e.
+        ``[0, 0, 0, 0, 0, 0]``). As this behaviour is poorly defined, it may
+        not match the expectations of other software.
+
     """
     format = 'DCD'
     multiframe = True
@@ -418,6 +427,9 @@ class DCDWriter(base.WriterBase):
         try:
             dimensions = ts.dimensions.copy()
         except AttributeError:
+            wmsg = ('No dimensions set for current frame, zeroed unitcell '
+                    'will be written')
+            warnings.warn(wmsg)
             dimensions = np.zeros(6)
 
         if self._convert_units:

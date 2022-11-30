@@ -30,9 +30,9 @@
 
 The module contains functions to fit a target structure to a reference
 structure. They use the fast QCP algorithm to calculate the root mean
-square distance (RMSD) between two coordinate sets [Theobald2005]_ and
-the rotation matrix *R* that minimizes the RMSD [Liu2010]_. (Please
-cite these references when using this module.).
+square distance (RMSD) between two coordinate sets :cite:p:`b-Theobald2005`
+and the rotation matrix *R* that minimizes the RMSD :cite:p:`b-Liu2010`.
+(Please cite these references when using this module.).
 
 Typically, one selects a group of atoms (such as the C-alphas),
 calculates the RMSD and transformation matrix, and applys the
@@ -76,14 +76,14 @@ two structures, using :func:`rmsd`::
    >>> ref = mda.Universe(PDB_small)
    >>> mobile = mda.Universe(PSF,DCD)
    >>> rmsd(mobile.select_atoms('name CA').positions, ref.select_atoms('name CA').positions)
-   16.282308620224068
+   28.20178579474479
 
 Note that in this example translations have not been removed. In order
 to look at the pure rotation one needs to superimpose the centres of
 mass (or geometry) first:
 
    >>> rmsd(mobile.select_atoms('name CA').positions, ref.select_atoms('name CA').positions, center=True)
-   12.639693690256898
+   21.892591663632704
 
 This has only done a translational superposition. If you want to also do a
 rotational superposition use the superposition keyword. This will calculate a
@@ -91,17 +91,17 @@ minimized RMSD between the reference and mobile structure.
 
    >>> rmsd(mobile.select_atoms('name CA').positions, ref.select_atoms('name CA').positions,
    >>>      superposition=True)
-   6.8093965864717951
+   6.809396586471815
 
 The rotation matrix that superimposes *mobile* on *ref* while
 minimizing the CA-RMSD is obtained with the :func:`rotation_matrix`
 function ::
 
-   >>> mobile0 = mobile.select_atoms('name CA').positions - mobile.atoms.center_of_mass()
-   >>> ref0 = ref.select_atoms('name CA').positions - ref.atoms.center_of_mass()
+   >>> mobile0 = mobile.select_atoms('name CA').positions - mobile.select_atoms('name CA').center_of_mass()
+   >>> ref0 = ref.select_atoms('name CA').positions - ref.select_atoms('name CA').center_of_mass()
    >>> R, rmsd = align.rotation_matrix(mobile0, ref0)
    >>> print rmsd
-   6.8093965864717951
+   6.809396586471805
    >>> print R
    [[ 0.14514539 -0.27259113  0.95111876]
     [ 0.88652593  0.46267112 -0.00268642]
@@ -183,6 +183,14 @@ normal users.
 .. autofunction:: sequence_alignment
 .. autofunction:: get_matching_atoms
 
+.. bibliography::
+   :filter: False
+   :style: MDA
+   :keyprefix: b-
+   :labelprefix: ᵇ
+
+   Liu2010
+   Theobald2005
 """
 import os.path
 import warnings
@@ -953,7 +961,7 @@ class AverageStructure(AnalysisBase):
     @property
     def positions(self):
         wmsg = ("The `positions` attribute was deprecated in MDAnalysis 2.0.0 "
-                "and will be removed in MDAnalyssi 3.0.0. Please use "
+                "and will be removed in MDAnalysis 3.0.0. Please use "
                 "`results.positions` instead.")
         warnings.warn(wmsg, DeprecationWarning)
         return self.results.positions
@@ -1077,7 +1085,7 @@ def fasta2select(fastafilename, is_aligned=False,
         filename of ClustalW alignment (clustal format) that is
         produced by *clustalw* when *is_aligned* = ``False``.
         default ``None`` uses the name and path of *fastafilename* and
-        subsititutes the suffix with '.aln'.
+        substitutes the suffix with '.aln'.
     treefilename: str (optional)
         filename of ClustalW guide tree (Newick format);
         if default ``None``  the the filename is generated from *alnfilename*

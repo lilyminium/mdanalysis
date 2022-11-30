@@ -81,13 +81,13 @@ __all__ = [
     "TPR450", "TPR451", "TPR452", "TPR453", "TPR454", "TPR455", "TPR455Double",
     "TPR460", "TPR461", "TPR502", "TPR504", "TPR505", "TPR510", "TPR2016",
     "TPR2018", "TPR2019B3", "TPR2020B2", "TPR2020", "TPR2020Double",
-    "TPR2021", "TPR2021Double",
+    "TPR2021", "TPR2021Double", "TPR2022RC1",
     "TPR510_bonded", "TPR2016_bonded", "TPR2018_bonded", "TPR2019B3_bonded",
     "TPR2020B2_bonded", "TPR2020_bonded", "TPR2020_double_bonded",
-    "TPR2021_bonded", "TPR2021_double_bonded",
+    "TPR2021_bonded", "TPR2021_double_bonded", "TPR2022RC1_bonded",
     "TPR334_bonded",
     "TPR_EXTRA_2021", "TPR_EXTRA_2020", "TPR_EXTRA_2018",
-    "TPR_EXTRA_2016", "TPR_EXTRA_407",
+    "TPR_EXTRA_2016", "TPR_EXTRA_407", "TPR_EXTRA_2022RC1",
     "PDB_sub_sol", "PDB_sub_dry",  # TRRReader sub selection
     "TRR_sub_sol",
     "XTC_sub_sol",
@@ -122,6 +122,7 @@ __all__ = [
     "DMS_DOMAINS",  # ADK closed with multiple segids
     "DMS_NO_SEGID",  # ADK closed with no segids or chains
     "CONECT",  # HIV Reverse Transcriptase with inhibitor
+    "CONECT_ERROR",  # PDB file with corrupt CONECT
     "TRZ", "TRZ_psf",
     "TRIC",
     "XTC_multi_frame",
@@ -136,7 +137,12 @@ __all__ = [
     "LAMMPScnt", "LAMMPScnt2",  # triclinic box
     "LAMMPShyd", "LAMMPShyd2",
     "LAMMPSdata_deletedatoms",  # with deleted atoms
+    "LAMMPSdata_triclinic", # lammpsdata file to test triclinic dimension parsing, albite with most atoms deleted
     "LAMMPSDUMP",
+    "LAMMPSDUMP_long",  # lammpsdump file with a few zeros sprinkled in the first column first frame
+    "LAMMPSDUMP_allcoords",  # lammpsdump file with all coordinate conventions (x,xs,xu,xsu) present, from LAMMPS rdf example
+    "LAMMPSDUMP_nocoords",  # lammpsdump file with no coordinates
+    "LAMMPSDUMP_triclinic", # lammpsdump file to test triclinic dimension parsing, albite with most atoms deleted
     "unordered_res",  # pdb file with resids non sequential
     "GMS_ASYMOPT",  # GAMESS C1  optimization
     "GMS_SYMOPT",   # GAMESS D4h optimization
@@ -147,6 +153,7 @@ __all__ = [
     "DLP_CONFIG", "DLP_CONFIG_order", "DLP_CONFIG_minimal",  # dl_poly 4 config file
     "DLP_HISTORY", "DLP_HISTORY_order", "DLP_HISTORY_minimal",  # dl_poly 4 history file
     "DLP_HISTORY_minimal_cell", # dl_poly 4 history file with cell parameters
+    "DLP_HISTORY_classic",  # dl_poly classic history file
     "waterPSF","waterDCD","rmsfArray",
     "HoomdXMLdata",
     "Make_Whole",  # for testing the function lib.mdamath.make_whole, has 9 atoms
@@ -169,6 +176,8 @@ __all__ = [
     "RANDOM_WALK_TOPO", # garbage topology to go along with XTC positions above
     "AUX_XVG", "XVG_BAD_NCOL", #for testing .xvg auxiliary reader
     "AUX_XVG_LOWF", "AUX_XVG_HIGHF",
+    "AUX_EDR", "AUX_EDR_TPR",
+    "AUX_EDR_XTC", "AUX_EDR_RAW",  # for testing .edr auxiliary reader
     "MMTF", "MMTF_gz", 'MMTF_skinny',  # skinny - some optional fields stripped out
     "MMTF_skinny2",
     "ALIGN_BOUND",  # two component bound system
@@ -189,6 +198,7 @@ __all__ = [
     "ITP", # for GROMACS generated itps
     "ITP_nomass", # for ATB generated itps
     "ITP_atomtypes",  # atom definitions to check atomtyes section parsing
+    "ITP_charges", # atom definitions to test custom particle charge parsing.
     "NAMDBIN", # for NAMD generated binary file
     "ITP_edited", # to check different directives are read properly
     "ITP_tip5p", # tip5p water from opls-aa, edited with additional keywords
@@ -204,7 +214,7 @@ __all__ = [
     "SDF_molecule",  # MDL SDFile for rdkit
     "PDBX",  # PDBxfile
     "PDB_elements",  # PDB file with elements
-    "PDB_elements",  # PDB file with elements
+    "PDB_charges",  # PDB file with formal charges
     "SURFACE_PDB",  # 111 FCC lattice topology for NSGrid bug #2345
     "SURFACE_TRR",  # full precision coordinates for NSGrid bug #2345
 ]
@@ -232,6 +242,10 @@ AUX_XVG_LOWF = resource_filename(__name__, 'data/test_lowf.xvg')
 AUX_XVG_HIGHF = resource_filename(__name__, 'data/test_highf.xvg')
 XVG_BAD_NCOL = resource_filename(__name__, 'data/bad_num_col.xvg')
 AUX_XVG = resource_filename(__name__, 'data/test.xvg')
+AUX_EDR = resource_filename(__name__, 'data/test.edr')
+AUX_EDR_RAW = resource_filename(__name__, 'data/aux_edr_raw.txt')
+AUX_EDR_TPR = resource_filename(__name__, 'data/aux_edr.tpr')
+AUX_EDR_XTC = resource_filename(__name__, 'data/aux_edr.xtc')
 ENT = resource_filename(__name__, 'data/testENT.ent')
 GRO_missing_atomname = resource_filename(__name__, 'data/missing_atomname.gro')
 GRO_empty_atom = resource_filename(__name__, 'data/empty_atom.gro')
@@ -352,6 +366,7 @@ TPR2019B3 = resource_filename(__name__, 'data/tprs/2lyz_gmx_2019-beta3.tpr')
 TPR2020B2 = resource_filename(__name__, 'data/tprs/2lyz_gmx_2020-beta2.tpr')
 TPR2020 = resource_filename(__name__, 'data/tprs/2lyz_gmx_2020.tpr')
 TPR2021 = resource_filename(__name__, 'data/tprs/2lyz_gmx_2021.tpr')
+TPR2022RC1 = resource_filename(__name__, 'data/tprs/2lyz_gmx_2022-rc1.tpr')
 # double precision
 TPR455Double = resource_filename(__name__, 'data/tprs/drew_gmx_4.5.5.double.tpr')
 TPR460 = resource_filename(__name__, 'data/tprs/ab42_gmx_4.6.tpr')
@@ -369,7 +384,9 @@ TPR2020_bonded = resource_filename(__name__, 'data/tprs/all_bonded/dummy_2020.tp
 TPR2020_double_bonded = resource_filename(__name__, 'data/tprs/all_bonded/dummy_2020_double.tpr')
 TPR2021_bonded = resource_filename(__name__, 'data/tprs/all_bonded/dummy_2021.tpr')
 TPR2021_double_bonded = resource_filename(__name__, 'data/tprs/all_bonded/dummy_2021_double.tpr')
+TPR2022RC1_bonded = resource_filename(__name__, 'data/tprs/all_bonded/dummy_2022-rc1.tpr')
 # all interactions
+TPR_EXTRA_2022RC1 = resource_filename(__name__, 'data/tprs/virtual_sites/extra-interactions-2022-rc1.tpr')
 TPR_EXTRA_2021 = resource_filename(__name__, 'data/tprs/virtual_sites/extra-interactions-2021.tpr')
 TPR_EXTRA_2020 = resource_filename(__name__, 'data/tprs/virtual_sites/extra-interactions-2020.tpr')
 TPR_EXTRA_2018 = resource_filename(__name__, 'data/tprs/virtual_sites/extra-interactions-2018.tpr')
@@ -442,6 +459,7 @@ DMS_DOMAINS = resource_filename(__name__, 'data/adk_closed_domains.dms')
 DMS_NO_SEGID = resource_filename(__name__, 'data/adk_closed_no_segid.dms')
 
 CONECT = resource_filename(__name__, 'data/1hvr.pdb')
+CONECT_ERROR = resource_filename(__name__, 'data/conect_error.pdb')
 
 TRZ = resource_filename(__name__, 'data/trzfile.trz')
 TRZ_psf = resource_filename(__name__, 'data/trz_psf.psf')
@@ -483,7 +501,13 @@ LAMMPScnt2 = resource_filename(__name__, "data/lammps/cnt-hexagonal-class1.data2
 LAMMPShyd = resource_filename(__name__, "data/lammps/hydrogen-class1.data")
 LAMMPShyd2 = resource_filename(__name__, "data/lammps/hydrogen-class1.data2")
 LAMMPSdata_deletedatoms = resource_filename(__name__, 'data/lammps/deletedatoms.data')
+LAMMPSdata_triclinic = resource_filename(__name__, "data/lammps/albite_triclinic.data")
 LAMMPSDUMP = resource_filename(__name__, "data/lammps/wat.lammpstrj.bz2")
+LAMMPSDUMP_long = resource_filename(__name__, "data/lammps/wat.lammpstrj_long.bz2")
+LAMMPSDUMP_allcoords = resource_filename(__name__, "data/lammps/spce_all_coords.lammpstrj.bz2")
+LAMMPSDUMP_nocoords = resource_filename(__name__, "data/lammps/spce_no_coords.lammpstrj.bz2")
+LAMMPSDUMP_triclinic = resource_filename(__name__, "data/lammps/albite_triclinic.dump")
+
 
 unordered_res = resource_filename(__name__, "data/unordered_res.pdb")
 
@@ -503,6 +527,7 @@ DLP_HISTORY = resource_filename(__name__, "data/dlpoly/HISTORY")
 DLP_HISTORY_order = resource_filename(__name__, "data/dlpoly/HISTORY_order")
 DLP_HISTORY_minimal = resource_filename(__name__, "data/dlpoly/HISTORY_minimal")
 DLP_HISTORY_minimal_cell = resource_filename(__name__, "data/dlpoly/HISTORY_minimal_cell")
+DLP_HISTORY_classic = resource_filename(__name__, "data/dlpoly/HISTORY_classic")
 
 waterPSF = resource_filename(__name__, 'data/watdyn.psf')
 waterDCD = resource_filename(__name__, 'data/watdyn.dcd')
@@ -550,6 +575,7 @@ BATArray = resource_filename(__name__, 'data/mol2_comments_header_bat.npy')
 ITP = resource_filename(__name__, 'data/gromacs_ala10.itp')
 ITP_nomass = resource_filename(__name__, 'data/itp_nomass.itp')
 ITP_atomtypes = resource_filename(__name__, 'data/atomtypes.itp')
+ITP_charges = resource_filename(__name__, 'data/atomtypes_charge.itp')
 ITP_edited = resource_filename(__name__, 'data/edited_itp.itp')
 ITP_tip5p = resource_filename(__name__, "data/tip5p.itp")
 ITP_spce = resource_filename(__name__, 'data/spce.itp')
@@ -564,7 +590,7 @@ NAMDBIN = resource_filename(__name__, 'data/adk_open.coor')
 SDF_molecule = resource_filename(__name__, 'data/molecule.sdf')
 
 PDB_elements = resource_filename(__name__, 'data/elements.pdb')
-
+PDB_charges = resource_filename(__name__, 'data/charges.pdb')
 
 PDBX = resource_filename(__name__, "data/4x8u.pdbx")
 

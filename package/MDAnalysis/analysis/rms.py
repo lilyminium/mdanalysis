@@ -38,13 +38,20 @@ The module contains code to analyze root mean square quantities such
 as the coordinat root mean square distance (:class:`RMSD`) or the
 per-residue root mean square fluctuations (:class:`RMSF`).
 
-This module uses the fast QCP algorithm [Theobald2005]_ to calculate
+This module uses the fast QCP algorithm :cite:p:`d-Theobald2005` to calculate
 the root mean square distance (RMSD) between two coordinate sets (as
 implemented in
 :func:`MDAnalysis.lib.qcprot.CalcRMSDRotationalMatrix`).
 
-When using this module in published work please cite [Theobald2005]_.
+When using this module in published work please cite :cite:p:`d-Theobald2005`.
 
+.. bibliography::
+   :filter: False
+   :style: MDA
+   :keyprefix: d-
+   :labelprefix: ᵈ
+
+   Theobald2005
 
 See Also
 --------
@@ -73,7 +80,7 @@ NMP domain.
 * calculate the backbone RMSD and RMSD for CORE, LID, NMP (backbone atoms)
 
 The trajectory is included with the test data files. The data in
-:attr:`RMSD.results.rmsd` is plotted with :func:`matplotlib.pyplot.plot`::
+:attr:`RMSD.results.rmsd` is plotted with :func:`matplotlib.pyplot.plot` (see Figure :ref:`RMSD plot figure <figure-RMSD>`)::
 
    import MDAnalysis
    from MDAnalysis.tests.datafiles import PSF,DCD,CRD
@@ -103,8 +110,16 @@ The trajectory is included with the test data files. The data in
    ax.set_xlabel("time (ps)")
    ax.set_ylabel(r"RMSD ($\\AA$)")
    fig.savefig("rmsd_all_CORE_LID_NMP_ref1AKE.pdf")
+   
+.. _figure-RMSD:
 
+.. figure:: /images/RSMD_plot.png
+      :scale: 50 %
+      :alt: RMSD plot
+      
+      RMSD plot for backbone and CORE, LID, NMP domain of the protein.
 
+      
 Functions
 ---------
 
@@ -195,7 +210,7 @@ def rmsd(a, b, weights=None, center=False, superposition=False):
         compute weighted average as center.
     superposition : bool (optional)
         perform a rotational and translational superposition with the fast QCP
-        algorithm [Theobald2005]_ before calculating the RMSD; implies
+        algorithm :cite:p:`d-Theobald2005` before calculating the RMSD; implies
         ``center=True``.
 
     Returns
@@ -456,10 +471,11 @@ class RMSD(AnalysisBase):
            w_i = \frac{w'_i}{\langle w' \rangle}
 
         The selected coordinates from `atomgroup` are optimally superimposed
-        (translation and rotation) on the `reference` coordinates at each time step
-        as to minimize the RMSD. Douglas Theobald's fast QCP algorithm
-        [Theobald2005]_ is used for the rotational superposition and to calculate
-        the RMSD (see :mod:`MDAnalysis.lib.qcprot` for implementation details).
+        (translation and rotation) on the `reference` coordinates at each time
+        step as to minimize the RMSD. Douglas Theobald's fast QCP algorithm
+        :cite:p:`d-Theobald2005` is used for the rotational superposition and
+        to calculate the RMSD (see :mod:`MDAnalysis.lib.qcprot` for
+        implementation details).
 
         The class runs various checks on the input to ensure that the two atom
         groups can be compared. This includes a comparison of atom masses (i.e.,
@@ -755,7 +771,7 @@ class RMSF(AnalysisBase):
         No mass weighting is performed.
 
         This method implements an algorithm for computing sums of squares while
-        avoiding overflows and underflows [Welford1962]_.
+        avoiding overflows and underflows :cite:p:`Welford1962`.
 
 
         Examples
@@ -832,9 +848,11 @@ class RMSF(AnalysisBase):
 
         References
         ----------
-        .. [Welford1962] B. P. Welford (1962). "Note on a Method for
-           Calculating Corrected Sums of Squares and Products." Technometrics
-           4(3):419-420.
+        .. bibliography::
+            :filter: False
+            :style: MDA
+
+            Welford1962
 
 
         .. versionadded:: 0.11.0
