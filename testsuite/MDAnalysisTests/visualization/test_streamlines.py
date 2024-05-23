@@ -26,7 +26,7 @@ import MDAnalysis
 from MDAnalysis.visualization import (streamlines,
                                       streamlines_3D)
 from MDAnalysis.coordinates.XTC import XTCWriter
-from MDAnalysisTests.datafiles import Martini_membrane_gro
+from MDAnalysisTests.datafiles import Martini_membrane_gro, GRO_MEMPROT, XTC_MEMPROT
 import pytest
 from pytest import approx
 import matplotlib.pyplot as plt
@@ -58,7 +58,7 @@ def test_streamplot_2D(membrane_xtc, univ):
                                                         trajectory_file_path=membrane_xtc,
                                                         grid_spacing=20,
                                                         MDA_selection='name PO4',
-                                                        start_frame=1,
+                                                        start_frame=0,
                                                         end_frame=2,
                                                         xmin=univ.atoms.positions[...,0].min(),
                                                         xmax=univ.atoms.positions[...,0].max(),
@@ -127,3 +127,77 @@ def test_streamplot_3D(membrane_xtc, univ, tmpdir):
     assert dx[4, 4, 0] == approx(0.700004, abs=1e-5)
     assert dy[0, 0, 0] == approx(0.460000, abs=1e-5)
     assert dz[2, 2, 0] == approx(0.240005, abs=1e-5)
+    assert False
+
+
+
+def test_memprot():
+    u1, v1, avg, std = streamlines.generate_streamlines(
+        topology_file_path=GRO_MEMPROT,
+        trajectory_file_path=XTC_MEMPROT,
+        grid_spacing=10,
+        MDA_selection='name P',
+        start_frame=1,
+        end_frame=2,
+        xmin=-30,
+        xmax=80,
+        ymin=-15,
+        ymax=100,
+        maximum_delta_magnitude=2.0,
+        num_cores=1
+    )
+
+    expected_dx_array = np.array([
+        [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        -0.39499855,  0.        ,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.15499878,  0.        ],
+       [ 0.        ,  0.        ,  0.        , -0.05666637,  0.        ,
+        -1.3220005 ,  0.59999847,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        , -1.04999924,
+         0.        ,  0.        ,  0.        ,  0.        , -1.97200012],
+       [ 1.38749886,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        , -1.76999664, -0.45999908, -1.09249878,  0.        ],
+       [ 0.        , -0.78499985, -1.69999981, -1.06999993,  0.        ,
+         0.        ,  0.        ,  0.36000061,  0.        ,  0.        ],
+       [ 0.        ,  0.75333309,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.81499481, -1.30666733,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  1.26333237,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  1.07000351,  0.        , -0.13249207,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        , -0.23250198,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.21000671,  0.        ],
+    ])
+    assert_allclose(u1, expected_dx_array)
+
+    expected_dy_array = np.array([
+        [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        -1.34800053,  0.81000137,  0.44999981,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        , -1.54999924,  1.92000198,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.59399796,  0.        ,
+         0.        ,  0.        , -0.09500122,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  1.91000366,  0.        , -1.30333328,
+         0.        ,  0.        ,  0.        ,  1.97333145,  0.29000092],
+       [ 0.        ,  0.        ,  0.        , -1.75500107,  1.61000443,
+         0.        ,  0.        ,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        , -1.73500061,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  0.        ,  0.        ,  0.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+         0.        ,  1.74333191, -1.73751068,  0.        ,  0.        ]
+    ])
+    assert_allclose(v1, expected_dy_array)
+
+    assert avg == pytest.approx(0.3457820553720478)
+    assert std == pytest.approx(0.6350492210553909)

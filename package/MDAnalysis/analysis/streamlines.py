@@ -22,7 +22,6 @@
 #
 
 import typing
-import multiprocessing
 import numpy as np
 
 from .base import AnalysisBase
@@ -37,6 +36,9 @@ class Streamlines(AnalysisBase):
         x_max: typing.Optional[float] = None,
         y_min: typing.Optional[float] = None,
         y_max: typing.Optional[float] = None,
+        z_min: typing.Optional[float] = None,
+        z_max: typing.Optional[float] = None,
+        in_3D: bool = False,
         maximum_delta_magnitude: float = None,
         **kwargs
     ):
@@ -47,45 +49,29 @@ class Streamlines(AnalysisBase):
         self.x_min = x_min
         self.y_max = y_max
         self.y_min = y_min
+        self.z_max = z_max
+        self.z_min = z_min
+        self.in_3D = in_3D
         self.maximum_delta_magnitude = maximum_delta_magnitude
     
 
     def _set_grid_bounds(self):
-        get_min_axes = []
-        get_max_axes = []
         if self.x_min is None:
-            get_min_axes.append(0)
+            self.x_min = self.atomgroup.positions.T[0].min()
         if self.x_max is None:
-            get_max_axes.append(0)
+            self.x_max = self.atomgroup.positions.T[0].max()
         if self.y_min is None:
-            get_min_axes.append(1)
+            self.y_min = self.atomgroup.positions.T[1].min()
         if self.y_max is None:
-            get_max_axes.append(1)
-
-        all_mins = []
-        all_maxs = []
-        for _ in self._sliced_trajectory:
-            all_mins.append(
-                self.atomgroup.positions.T[get_min_axes].min(axis=1)
-            )
-            all_maxs.append(
-                self.atomgroup.positions.T[get_max_axes].max(axis=1)
-            )
-        mins = np.min(all_mins, axis=0)
-        maxs = np.max(all_maxs, axis=0)
-        if self.x_min is None:
-            self.x_min = mins[0]
-        if self.x_max is None:
-            self.x_max = maxs[0]
-        if self.y_min is None:
-            self.y_min = mins[-1]
-        if self.y_max is None:
-            self.y_max = maxs[-1]
+            self.y_max = self.atomgroup.positions.T[1].max()
+        if self.in_3D:
+            if self.z_min is None:
+                self.z_min = self.atomgroup.positions.T[2].min()
+            if self.z_max is None:
+                self.z_max = self.atomgroup.positions.T[2].max()
 
     def _prepare(self):
-        bounds = [self.x_min, self.x_max, self.y_min, self.y_max]
-        if any(b is None for b in bounds):
-            self._set_grid_bounds()
+        self._set_grid_bounds()
 
         self.results.x_edges = np.arange(
             self.x_min, self.x_max, self.grid_spacing
@@ -95,21 +81,27 @@ class Streamlines(AnalysisBase):
             self.y_min, self.y_max, self.grid_spacing
         )
         self.results.n_y = len(self.results.y_edges) - 1
+
+        if self.in_3D:
+            self.results.z_edges = np.arange(
+                self.z_min, self.z_max, self.grid_spacing
+            )
+            self.results.n_z = len(self.results.z_edges) - 1
+        else:
+            self.results.z_edges = []
+            self.results.n_z = 1
+
+        n_xyz = self.results.n_x * self.results.n_y * self.results.n_z
+        centroid_shape = (self.n_frames, n_xyz, 3)
+
         self._framewise_atom_grid_index = np.zeros(
             (self.n_frames, self.atomgroup.n_atoms), dtype=int
         )
-        self._framewise_grid_centroids = np.full(
-            (self.n_frames, self.results.n_x * self.results.n_y, 2),
-            np.nan
-        )
-        self._next_grid_centroids = np.full(
-            (self.n_frames, self.results.n_x * self.results.n_y, 2),
-            np.nan
-        )
+        self._framewise_grid_centroids = np.full(centroid_shape, np.nan)
+        self._next_grid_centroids = np.full(centroid_shape, np.nan)
 
     def _single_frame(self):
-        x = self.atomgroup.positions.T[0]
-        y = self.atomgroup.positions.T[1]
+        x, y, z = self.atomgroup.positions.T
 
         # ignore anything under the lower bound or above upper bound
         # we do this by setting anything too low or too high to -1
@@ -119,8 +111,22 @@ class Streamlines(AnalysisBase):
         y_indices = np.digitize(y, self.results.y_edges)
         y_indices[y_indices == self.results.n_y + 1] = 0
         y_indices -= 1
-        grid_indices = (x_indices * self.results.n_x) + y_indices
-        mask = (x_indices == -1) | (y_indices == -1)
+
+        if self.in_3D:
+            z_indices = np.digitize(z, self.results.z_edges)
+            z_indices[z_indices == self.results.n_z + 1] = 0
+            z_indices -= 1
+        else:
+            z_indices = np.zeros_like(z, dtype=int)
+        
+        # flatten 3d indices to 1d
+        grid_indices = (
+            (x_indices * self.results.n_y * self.results.n_z)
+            + (y_indices * self.results.n_z) + z_indices
+        )
+
+        # grid_indices = (x_indices * self.results.n_x) + y_indices
+        mask = (x_indices == -1) | (y_indices == -1) | (z_indices == -1)
         grid_indices[mask] = -1
 
         self._framewise_atom_grid_index[self._frame_index] = grid_indices
@@ -138,16 +144,18 @@ class Streamlines(AnalysisBase):
             positions_this_frame = self.atomgroup.positions[indices_this_frame]
             centroid_this_frame = np.mean(positions_this_frame, axis=0)
             key = (self._frame_index, grid_idx)
-            self._framewise_grid_centroids[key] = centroid_this_frame[:2]
+            self._framewise_grid_centroids[key] = centroid_this_frame
 
             # now compute centroids this frame using indices from last frame
             grid_last_frame = self._framewise_atom_grid_index[self._frame_index - 1]
             indices_last_frame = np.where(grid_last_frame == grid_idx)[0]
             positions_last_frame = self.atomgroup.positions[indices_last_frame]
             centroid_last_frame = np.mean(positions_last_frame, axis=0)
-            self._next_grid_centroids[key] = centroid_last_frame[:2]
+            self._next_grid_centroids[key] = centroid_last_frame
 
     def _conclude(self):
+        print(self._next_grid_centroids.shape)
+        print(self._framewise_grid_centroids.shape)
         displacements = (
             self._next_grid_centroids[1:] - self._framewise_grid_centroids[:-1]
         )
@@ -158,12 +166,25 @@ class Streamlines(AnalysisBase):
         displacements[np.isnan(displacements)] = 0
 
 
-        shape = (self.n_frames - 1, self.results.n_x, self.results.n_y)
-        self.results.dx_array = displacements[..., 0].reshape(shape)
-        self.results.dy_array = displacements[..., 1].reshape(shape)
-        self.results.displacements = np.sqrt(
+        shape = (self.n_frames - 1, self.results.n_x, self.results.n_y, self.results.n_z, 3)
+        print(displacements)
+        displacements = displacements.reshape(shape)
+        self.results.dx_array = displacements[..., 0]
+        self.results.dy_array = displacements[..., 1]
+        self.results.dz_array = displacements[..., 2]
+        # self.results.dx_array = displacements[..., 0].reshape(shape)
+        # self.results.dy_array = displacements[..., 1].reshape(shape)
+        
+        disp_sq = (
             self.results.dx_array ** 2 + self.results.dy_array ** 2
         )
+        if self.in_3D:
+            disp_sq += self.results.dz_array ** 2
+
+        self.results.displacements = np.sqrt(disp_sq)
         self.results.displacement_mean = np.mean(self.results.displacements)
         self.results.displacement_std = np.std(self.results.displacements)
+
+
+
 
