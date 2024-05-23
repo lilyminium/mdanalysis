@@ -83,7 +83,6 @@ class Streamlines(AnalysisBase):
             self.y_max = maxs[-1]
 
     def _prepare(self):
-        print("n_frames", self.n_frames, self.start, self.stop)
         bounds = [self.x_min, self.x_max, self.y_min, self.y_max]
         if any(b is None for b in bounds):
             self._set_grid_bounds()
@@ -103,10 +102,10 @@ class Streamlines(AnalysisBase):
             (self.n_frames, self.results.n_x * self.results.n_y, 2),
             np.nan
         )
-        # print(np.mgrid[self.x_min:self.x_max:self.grid_spacing, self.y_min:self.y_max:self.grid_spacing])
-        print(self.x_min, self.x_max, self.results.x_edges)
-        print(self.y_min, self.y_max, self.results.y_edges)
-
+        self._next_grid_centroids = np.full(
+            (self.n_frames, self.results.n_x * self.results.n_y, 2),
+            np.nan
+        )
 
     def _single_frame(self):
         x = self.atomgroup.positions.T[0]
@@ -126,38 +125,42 @@ class Streamlines(AnalysisBase):
 
         self._framewise_atom_grid_index[self._frame_index] = grid_indices
 
-        unique_indices, inverse_indices = np.unique(
-            grid_indices, return_inverse=True
-        )
-        print(unique_indices)
+        # dx is centroid computed *this* frame using indices from last frame,
+        # minus centroid computed last frame using indices from last frame
+
+        unique_indices = np.unique(grid_indices)
         for grid_idx in unique_indices:
             if grid_idx == -1:
                 continue
-            print(grid_idx, self._framewise_grid_centroids.shape)
-            inverse_idx = np.where(inverse_indices == grid_idx)[0]
-            atoms_in_square = self.atomgroup[inverse_idx]
-            centroid = np.mean(atoms_in_square.positions, axis=0)
-            self._framewise_grid_centroids[
-                self._frame_index, grid_idx
-            ] = centroid[:2]
-        # for grid_idx, inverse_idx in zip(unique_indices, inverse_indices):
-        #     atoms_in_square = self.atomgroup[inverse_idx]
-        #     self._framewise_grid_centroids[
-        #         self._frame_index, grid_idx
-        #     ] = np.mean(atoms_in_square.positions, axis=0)
 
+            # first compute centroids this frame using indices this frame
+            indices_this_frame = np.where(grid_indices == grid_idx)[0]
+            positions_this_frame = self.atomgroup.positions[indices_this_frame]
+            centroid_this_frame = np.mean(positions_this_frame, axis=0)
+            key = (self._frame_index, grid_idx)
+            self._framewise_grid_centroids[key] = centroid_this_frame[:2]
+
+            # now compute centroids this frame using indices from last frame
+            grid_last_frame = self._framewise_atom_grid_index[self._frame_index - 1]
+            indices_last_frame = np.where(grid_last_frame == grid_idx)[0]
+            positions_last_frame = self.atomgroup.positions[indices_last_frame]
+            centroid_last_frame = np.mean(positions_last_frame, axis=0)
+            self._next_grid_centroids[key] = centroid_last_frame[:2]
 
     def _conclude(self):
-        centroids = self._framewise_grid_centroids
-        print(centroids.shape)
-        displacements = centroids[1:] - centroids[:-1]
+        displacements = (
+            self._next_grid_centroids[1:] - self._framewise_grid_centroids[:-1]
+        )
         if self.maximum_delta_magnitude is not None:
             max_delta = np.abs(self.maximum_delta_magnitude)
             displacements[displacements > max_delta] = np.nan
             displacements[displacements < -max_delta] = np.nan
         displacements[np.isnan(displacements)] = 0
-        self.results.dx_array = displacements[..., 0]
-        self.results.dy_array = displacements[..., 1]
+
+
+        shape = (self.n_frames - 1, self.results.n_x, self.results.n_y)
+        self.results.dx_array = displacements[..., 0].reshape(shape)
+        self.results.dy_array = displacements[..., 1].reshape(shape)
         self.results.displacements = np.sqrt(
             self.results.dx_array ** 2 + self.results.dy_array ** 2
         )
